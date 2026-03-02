@@ -1,0 +1,519 @@
+<!doctype html>
+<html lang="fi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Asuntolainalaskuri</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: #fff;
+        color: #222;
+      }
+
+      .laskuri {
+        max-width: 640px;
+        margin: 0 auto;
+        padding: 32px 24px;
+      }
+
+      h2 {
+        font-size: 1.4rem;
+        font-weight: 700;
+        margin-bottom: 28px;
+        color: #111;
+      }
+
+      .kentat {
+        display: grid;
+        gap: 20px;
+        margin-bottom: 32px;
+      }
+
+      label {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #555;
+        margin-bottom: 6px;
+        margin-top: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+      }
+
+      .input-wrap {
+        position: relative;
+        display: flex;
+        align-items: center;
+      }
+
+      input[type="number"],
+      input[type="text"] {
+        width: 100%;
+        padding: 12px 48px 12px 14px;
+        border: 1.5px solid #ddd;
+
+        font-size: 1rem;
+        color: #111;
+        background: #fafafa;
+        transition: border-color 0.15s;
+        -moz-appearance: textfield;
+      }
+
+      input[type="number"]::-webkit-outer-spin-button,
+      input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+      }
+
+      input[type="number"]:focus {
+        outline: none;
+        border-color: #0070f3;
+        background: #fff;
+      }
+
+      .unit {
+        position: absolute;
+        right: 14px;
+        font-size: 0.9rem;
+        color: #888;
+        pointer-events: none;
+      }
+
+      .slider-wrap {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .slider-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .slider-row input[type="range"] {
+        flex: 1;
+      }
+
+      .korko-input-wrap {
+        width: 90px;
+        flex-shrink: 0;
+      }
+
+      .korko-input-wrap input {
+        padding-right: 28px;
+      }
+
+      .tulokset-otsikko {
+        font-size: 1rem;
+        font-weight: 500;
+        color: #333;
+        line-height: 1.4;
+      }
+
+      .korko-arvo {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #0070f3;
+      }
+
+      input[type="range"] {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 100%;
+        height: 6px;
+
+        background: linear-gradient(
+          to right,
+          #0070f3 var(--pct),
+          #e0e0e0 var(--pct)
+        );
+        cursor: pointer;
+      }
+
+      input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 20px;
+        height: 20px;
+
+        background: #0070f3;
+        border: 2px solid #fff;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+      }
+
+      input[type="range"]::-moz-range-thumb {
+        width: 20px;
+        height: 20px;
+
+        background: #0070f3;
+        border: 2px solid #fff;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+      }
+
+      .slider-ticks {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.72rem;
+        color: #aaa;
+        padding: 0 calc(90px + 12px) 0 2px;
+      }
+
+      .tulokset {
+        background: #f5f8ff;
+        border: 1.5px solid #dde5ff;
+
+        padding: 24px;
+        display: grid;
+        gap: 16px;
+      }
+
+      .tulos-rivi {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+      }
+
+      .tulos-nimi {
+        font-size: 0.88rem;
+        color: #555;
+      }
+
+      .tulos-arvo {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #111;
+      }
+
+      .tulos-arvo.iso {
+        font-size: 1.5rem;
+        color: #0070f3;
+      }
+
+      .divider {
+        border: none;
+        border-top: 1px solid #dde5ff;
+      }
+
+      .varoitus {
+        display: none;
+        background: #fff3cd;
+        border: 1.5px solid #ffc107;
+
+        padding: 10px 14px;
+        font-size: 0.85rem;
+        color: #856404;
+      }
+
+      .tavoite-osio {
+        margin-top: 24px;
+        border: 1.5px solid #e0e0e0;
+
+        padding: 20px 24px;
+      }
+
+      .tavoite-rivi {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .tavoite-rivi label {
+        text-transform: none;
+        letter-spacing: 0;
+        font-size: 0.95rem;
+        font-weight: 500;
+        color: #333;
+        margin-bottom: 0;
+        white-space: nowrap;
+        cursor: pointer;
+      }
+
+      .tavoite-rivi .kk-era {
+        width: 160px;
+      }
+
+      .bar-labels {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+      }
+
+      .bar-labels span:last-child {
+        text-align: right;
+      }
+
+      .bar-wrap {
+        margin-top: 10px;
+      }
+
+      .otsikko {
+        margin: 12px 0;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="laskuri">
+      <h2>
+        Tasakorkolaskuri – kuinka pitkään asuntolainen takaisinmaksussa menee
+        tämänhetkisellä korkotasolla?
+      </h2>
+
+      <div class="kentat">
+        <div class="tavoite-osio">
+          <div>
+            <div class="otsikko">Valitse lainan määrä</div>
+            <div class="input-wrap">
+              <input
+                type="text"
+                id="laina"
+                value="200 000"
+                inputmode="numeric"
+              />
+              <span class="unit">€</span>
+            </div>
+          </div>
+
+          <div class="slider-wrap">
+            <div class="otsikko">Valitse korko</div>
+            <p>
+              3,93% on tämän päivän (30.11.2023) 12 kk Euribor-korko. Lisää
+              määrään pankin marginaali jos haluat tarkastella oman lainasi
+              tilannetta
+            </p>
+            <div class="slider-row">
+              <input
+                type="range"
+                id="korko"
+                min="0"
+                max="12"
+                step="0.05"
+                value="3.95"
+                style="--pct: 32.92%"
+              />
+              <div class="input-wrap korko-input-wrap">
+                <input
+                  type="number"
+                  id="korko-input"
+                  value="3.95"
+                  min="0"
+                  max="12"
+                  step="0.05"
+                />
+                <span class="unit">%</span>
+              </div>
+            </div>
+            <div class="slider-ticks">
+              <span>0 %</span>
+              <span>3 %</span>
+              <span>6 %</span>
+              <span>9 %</span>
+              <span>12 %</span>
+            </div>
+          </div>
+
+          <div class="tavoite-rivi" style="margin-top: 16px">
+            <label for="lyhennys">Valitse kuukausierä</label>
+            <div class="input-wrap kk-era">
+              <input
+                type="number"
+                id="lyhennys"
+                value="1000"
+                min="0"
+                step="50"
+              />
+              <span class="unit">€/kk</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="varoitus" id="varoitus">
+        Kuukausierä ei kata korkoja! Lainasaldo kasvaa joka kuukausi.
+      </div>
+
+      <div class="tulokset">
+        <div class="tulokset-otsikko">
+          Kun lainaa on <span id="otsikko-laina">200 000 €</span> korkotasolla
+          <span class="korko-arvo" id="korko-teksti">3,95 %</span> <br />maksat
+          lainaa yhteensä <span class="tulos-arvo iso" id="laina-aika">–</span>
+        </div>
+        <div class="bar-labels">
+          <span>
+            <span class="tulos-nimi">Lyhennys kuukaudessa</span><br />
+            <span class="tulos-arvo" id="lyhennys-kk">–</span>
+          </span>
+          <span>
+            <span class="tulos-nimi">Korot kuukaudessa</span><br />
+            <span class="tulos-arvo" id="korko-kk">–</span>
+          </span>
+        </div>
+        <div class="bar-wrap">
+          <svg id="bar-svg" width="100%" height="28" style="display: block">
+            <rect id="bar-lyhennys" x="0" y="0" height="28" fill="#0070f3" />
+            <rect id="bar-korko" x="0" y="0" height="28" fill="#e0e0e0" />
+          </svg>
+        </div>
+        <hr class="divider" />
+        <div class="tulos-rivi">
+          <span class="tulos-nimi">Korot yhteensä</span>
+          <span class="tulos-arvo" id="korot-yht">–</span>
+        </div>
+        <div class="tulos-rivi">
+          <span class="tulos-nimi">Maksetaan yhteensä</span>
+          <span class="tulos-arvo" id="maksetaan-yht">–</span>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const lainaInput = document.getElementById("laina");
+      const korkoSlider = document.getElementById("korko");
+      const korkoNumInput = document.getElementById("korko-input");
+      const lyhennysInput = document.getElementById("lyhennys");
+
+      const korkoTeksti = document.getElementById("korko-teksti");
+      const otsikkoLaina = document.getElementById("otsikko-laina");
+      const korkoKk = document.getElementById("korko-kk");
+      const lyhennysKk = document.getElementById("lyhennys-kk");
+      const lainaAika = document.getElementById("laina-aika");
+      const korotYht = document.getElementById("korot-yht");
+      const maksetaanYht = document.getElementById("maksetaan-yht");
+      const varoitus = document.getElementById("varoitus");
+
+      const barLyhennys = document.getElementById("bar-lyhennys");
+      const barKorko = document.getElementById("bar-korko");
+
+      function updateBar(lyhennys, korko) {
+        const total = lyhennys + korko;
+        const W = document
+          .getElementById("bar-svg")
+          .getBoundingClientRect().width;
+        if (total <= 0 || W === 0) {
+          barLyhennys.setAttribute("width", 0);
+          barKorko.setAttribute("width", 0);
+          return;
+        }
+        const lyh_w = (lyhennys / total) * W;
+        barLyhennys.setAttribute("width", lyh_w);
+        barKorko.setAttribute("x", lyh_w);
+        barKorko.setAttribute("width", W - lyh_w);
+      }
+
+      function lainaArvo() {
+        return parseInt(lainaInput.value.replace(/[\s\u00a0]/g, "")) || 0;
+      }
+
+      function formatLaina() {
+        const n = lainaArvo();
+        lainaInput.value =
+          n > 0 ? n.toLocaleString("fi-FI").replace(/\u00a0/g, " ") : "";
+      }
+
+      function fmt(n) {
+        return (
+          n.toLocaleString("fi-FI", {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0,
+          }) + " €"
+        );
+      }
+
+      function laske() {
+        const laina = lainaArvo();
+        otsikkoLaina.textContent = laina > 0 ? fmt(laina) : "–";
+        const korkoVuosi = parseFloat(korkoSlider.value) / 100;
+        const korkoKkArvo = korkoVuosi / 12;
+        const erä = parseFloat(lyhennysInput.value) || 0;
+
+        // Update slider track fill
+        const pct = (korkoSlider.value / 12) * 100;
+        korkoSlider.style.setProperty("--pct", pct + "%");
+
+        // Update korko display
+        const korkoNum = parseFloat(korkoSlider.value);
+        korkoTeksti.textContent =
+          korkoNum.toLocaleString("fi-FI", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          }) + " %";
+
+        if (laina <= 0 || erä <= 0) {
+          [korkoKk, lyhennysKk, lainaAika, korotYht, maksetaanYht].forEach(
+            (el) => (el.textContent = "–"),
+          );
+          varoitus.style.display = "none";
+          updateBar(0, 0);
+          return;
+        }
+
+        // Monthly interest on current balance
+        const korkoEuro = laina * korkoKkArvo;
+        korkoKk.textContent = fmt(korkoEuro);
+
+        const pääoma = erä - korkoEuro;
+        lyhennysKk.textContent = fmt(Math.max(0, pääoma));
+        updateBar(Math.max(0, pääoma), korkoEuro);
+
+        if (erä <= korkoEuro) {
+          varoitus.style.display = "block";
+          lainaAika.textContent = "–";
+          korotYht.textContent = "–";
+          maksetaanYht.textContent = "–";
+          return;
+        }
+
+        varoitus.style.display = "none";
+
+        let saldo = laina;
+        let kuukaudet = 0;
+        let korotSumma = 0;
+
+        while (saldo > 0.01 && kuukaudet < 12 * 100) {
+          const korkuuKk = saldo * korkoKkArvo;
+          korotSumma += korkuuKk;
+          const maksettuPääoma = Math.min(erä - korkuuKk, saldo);
+          saldo -= maksettuPääoma;
+          kuukaudet++;
+        }
+
+        const vuodet = Math.floor(kuukaudet / 12);
+        const kk = kuukaudet % 12;
+        let aikaStr = "";
+        if (vuodet > 0) aikaStr += vuodet + " v";
+        if (kk > 0) aikaStr += (aikaStr ? " " : "") + kk + " kk";
+        lainaAika.textContent = aikaStr || "< 1 kk";
+
+        korotYht.textContent = fmt(korotSumma);
+        maksetaanYht.textContent = fmt(laina + korotSumma);
+      }
+
+      lainaInput.addEventListener("input", laske);
+      lainaInput.addEventListener("blur", formatLaina);
+      korkoSlider.addEventListener("input", () => {
+        korkoNumInput.value = parseFloat(korkoSlider.value).toFixed(2);
+        laske();
+      });
+      korkoNumInput.addEventListener("input", () => {
+        const v = Math.min(
+          12,
+          Math.max(0, parseFloat(korkoNumInput.value) || 0),
+        );
+        korkoSlider.value = v;
+        laske();
+      });
+      lyhennysInput.addEventListener("input", laske);
+
+      laske();
+    </script>
+  </body>
+</html>

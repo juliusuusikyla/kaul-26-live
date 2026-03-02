@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kaul Asuntokaupat 2026</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+    <style>
+      .bar:hover {
+        opacity: 0.8;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Pääkaupunkiseudun ulkopuolella kauppa käy</h2>
+    <h3>Asuntokauppojen määrä 1–9/2025, %-muutos viime vuodesta</h3>
+    <div id="chart"></div>
+    <p>Lähde: KVKL, OP Uusimaa</p>
+    <p>Tekijä: Julius Uusikylä</p>
+
+    <script>
+      // 1. Dimensions & margins
+      const width = 820;
+      const height = 510;
+      const margin = { top: 10, right: 210, bottom: 120, left: 110 };
+      const innerW = width - margin.left - margin.right;
+      const innerH = height - margin.top - margin.bottom;
+
+      // 2. SVG & group
+      const svg = d3
+        .select("#chart")
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height);
+
+      svg
+        .append("defs")
+        .append("marker")
+        .attr("id", "arrow")
+        .attr("viewBox", "0 -5 10 10")
+        .attr("refX", 8)
+        .attr("refY", 0)
+        .attr("markerWidth", 5)
+        .attr("markerHeight", 5)
+        .attr("orient", "auto")
+        .append("path")
+        .attr("d", "M 0,-5 L 10,0 L 0,5 Z")
+        .attr("fill", "#555");
+
+      const g = svg
+        .append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
+
+      // 3. Data
+      const pkSeutu = new Set(["Kauniainen", "Helsinki", "Vantaa", "Espoo"]);
+      const data = [
+        { label: "Inkoo", value: 43 },
+        { label: "Kerava", value: 41 },
+        { label: "Mäntsälä", value: 36 },
+        { label: "Kirkkonummi", value: 31 },
+        { label: "Järvenpää", value: 23 },
+        { label: "Loviisa", value: 23 },
+        { label: "Hyvinkää", value: 22 },
+        { label: "Nurmijärvi", value: 20 },
+        { label: "Karkkila", value: 18 },
+        { label: "Porvoo", value: 17 },
+        { label: "Lohja", value: 17 },
+        { label: "Vihti", value: 15 },
+        { label: "Sipoo", value: 13 },
+        { label: "Kauniainen", value: 46 },
+        { label: "Vantaa", value: 24 },
+        { label: "Espoo", value: 21 },
+        { label: "Helsinki", value: 17 },
+      ].map((d) => ({
+        ...d,
+        category: pkSeutu.has(d.label) ? "pk-seutu" : "uusimaa",
+      }));
+
+      (() => {
+        const color = { "pk-seutu": "#7c3aed", uusimaa: "#86efac" };
+
+        // Sort descending by value
+        data.sort((a, b) => b.value - a.value);
+
+        // 4. Scales
+        const x = d3
+          .scaleLinear()
+          .domain([0, d3.max(data, (d) => d.value)])
+          .nice()
+          .range([0, innerW]);
+
+        const y = d3
+          .scaleBand()
+          .domain(data.map((d) => d.label))
+          .range([0, innerH])
+          .padding(0.3);
+
+        // 5. Axes
+        g.append("g")
+          .attr("class", "axis")
+          .attr("transform", `translate(0,${innerH})`)
+          .call(d3.axisBottom(x).ticks(5));
+
+        g.append("g").attr("class", "axis").call(d3.axisLeft(y).tickSize(0));
+
+        // 5b. Average line
+        const avg = d3.mean(data, (d) => d.value);
+        const avgLabel = `keskiarvo ${avg.toFixed(1).replace(".", ",")}%`;
+
+        g.append("line")
+          .attr("x1", x(avg))
+          .attr("x2", x(avg))
+          .attr("y1", 0)
+          .attr("y2", innerH)
+          .attr("stroke", "#555")
+          .attr("stroke-width", 1.5)
+          .attr("stroke-dasharray", "4,3");
+
+        g.append("text")
+          .attr("x", x(avg) + 4)
+          .attr("y", 0)
+          .attr("font-size", "11px")
+          .attr("fill", "#555")
+          .text(avgLabel);
+
+        // 6. Draw bars
+        const barPath = (w, yPos, bh, r = 4) => {
+          r = Math.min(r, w, bh / 2);
+          if (w <= 0) return `M 0,${yPos} H 0 V ${yPos + bh} H 0 Z`;
+          return `M 0,${yPos} H ${w - r} Q ${w},${yPos} ${w},${yPos + r} V ${yPos + bh - r} Q ${w},${yPos + bh} ${w - r},${yPos + bh} H 0 Z`;
+        };
+
+        const bars = g
+          .selectAll(".bar")
+          .data(data)
+          .join("path")
+          .attr("class", "bar")
+          .attr("fill", (d) => color[d.category])
+          .attr("d", (d) => barPath(0, y(d.label), y.bandwidth()));
+
+        bars
+          .transition()
+          .duration(600)
+          .delay((d, i) => i * 80)
+          .attr("d", (d) => barPath(x(d.value), y(d.label), y.bandwidth()));
+
+        // 7. Data labels
+        const labels = g
+          .selectAll(".bar-label")
+          .data(data)
+          .join("text")
+          .attr("class", "bar-label")
+          .attr("y", (d) => y(d.label) + y.bandwidth() / 2)
+          .attr("dy", "0.35em")
+          .attr("x", 0)
+          .attr("font-size", "12px")
+          .attr("font-weight", "bold")
+          .attr("fill", "#222")
+          .text((d) => `+${d.value}%`);
+
+        labels
+          .transition()
+          .duration(600)
+          .delay((d, i) => i * 80)
+          .attr("x", (d) => x(d.value) + 6);
+
+        // 8. Kauniainen annotation — placed below the chart
+        const ky = y("Kauniainen");
+        const bw = y.bandwidth();
+        const annoX = x(46);
+        const annoY = innerH + 45 - innerH * 0.35;
+        const annoLines = [
+          "Pienellä paikkakunnalla",
+          "kauppamäärät ovat alhaisia,",
+          "joten prosentuaalinen",
+          "muutos voi näyttäytyä suurelta.",
+        ];
+
+        const anno = g
+          .append("text")
+          .attr("x", annoX)
+          .attr("y", annoY)
+          .attr("text-anchor", "middle")
+          .attr("font-size", "11px")
+          .attr("fill", "#555")
+          .attr("font-style", "italic");
+
+        annoLines.forEach((line, i) => {
+          anno
+            .append("tspan")
+            .attr("x", annoX)
+            .attr("dy", i === 0 ? 0 : "1.3em")
+            .text(line);
+        });
+
+        // curved arrow from annotation up to just below Kauniainen bar on left axis
+        g.append("path")
+          .attr(
+            "d",
+            `M ${annoX},${annoY - 7} C ${annoX + 20},${innerH / 2} ${x(46) + 10},${ky + bw} ${x(46)},${ky + bw / 2}`,
+          )
+          .attr("fill", "none")
+          .attr("stroke", "#555")
+          .attr("stroke-width", 1)
+          .attr("marker-end", "url(#arrow)");
+      })();
+    </script>
+  </body>
+</html>

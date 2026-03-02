@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="fi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Asuntokaupat – karttavisualisaatio</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+    <style>
+      body {
+        font-family: sans-serif;
+        background: #f9f9f7;
+        margin: 0;
+        padding: 20px;
+      }
+      h2 {
+        margin-bottom: 4px;
+      }
+      h3 {
+        margin-top: 0;
+        font-weight: normal;
+        color: #555;
+      }
+      .bubble {
+        stroke: #fff;
+        stroke-width: 1.5;
+        opacity: 0.88;
+        cursor: default;
+      }
+      .bubble:hover {
+        opacity: 1;
+        stroke-width: 2.5;
+      }
+      .label-name {
+        font-size: 11px;
+        fill: #222;
+        font-weight: 600;
+        pointer-events: none;
+      }
+      .label-pct {
+        font-size: 12px;
+        fill: #000;
+        font-weight: 700;
+        pointer-events: none;
+      }
+      .legend-title {
+        font-size: 11px;
+        fill: #555;
+      }
+      .footnote {
+        font-size: 12px;
+        color: #888;
+        margin-top: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Asuntojen myyntiluvuissa nousua – kuntien välillä eroja</h2>
+    <h3>Asuntokauppojen määrä 1–9/2025, %-muutos viime vuodesta</h3>
+    <p>Ympyrän koko = väestö. Väri = myynnin kasvu (vaalea → tumma sininen).</p>
+    <div id="chart"></div>
+    <p class="footnote">
+      <br />Lähteet: KVKL, OP Uusimaa, Tilastokeskus. Tekijä: Julius Uusikylä
+    </p>
+
+    <script>
+      const data = [
+        { name: "Inkoo", pct: 43, pop: 5600, lat: 60.05, lon: 24.0 },
+        { name: "Kerava", pct: 41, pop: 37000, lat: 60.4, lon: 25.1 },
+        { name: "Mäntsälä", pct: 36, pop: 21000, lat: 60.63, lon: 25.32 },
+        { name: "Kirkkonummi", pct: 31, pop: 39000, lat: 60.13, lon: 24.43 },
+        { name: "Järvenpää", pct: 23, pop: 43000, lat: 60.47, lon: 25.08 },
+        { name: "Loviisa", pct: 23, pop: 15000, lat: 60.45, lon: 26.22 },
+        { name: "Hyvinkää", pct: 22, pop: 46000, lat: 60.63, lon: 24.85 },
+        { name: "Nurmijärvi", pct: 20, pop: 43000, lat: 60.47, lon: 24.8 },
+        { name: "Karkkila", pct: 18, pop: 8500, lat: 60.53, lon: 24.22 },
+        { name: "Porvoo", pct: 17, pop: 52000, lat: 60.39, lon: 25.66 },
+        { name: "Lohja", pct: 17, pop: 48000, lat: 60.25, lon: 24.07 },
+        { name: "Vihti", pct: 15, pop: 29000, lat: 60.42, lon: 24.35 },
+        { name: "Sipoo", pct: 13, pop: 21000, lat: 60.37, lon: 25.27 },
+        { name: "Kauniainen", pct: 46, pop: 10000, lat: 60.21, lon: 24.73 },
+        { name: "Vantaa", pct: 24, pop: 244000, lat: 60.3, lon: 25.0 },
+        { name: "Espoo", pct: 21, pop: 306000, lat: 60.21, lon: 24.66 },
+        { name: "Helsinki", pct: 17, pop: 659000, lat: 60.17, lon: 24.94 },
+      ];
+
+      const W = 1020,
+        H = 560;
+      const margin = { top: 20, right: 200, bottom: 20, left: 20 };
+
+      const svg = d3
+        .select("#chart")
+        .append("svg")
+        .attr("width", W)
+        .attr("height", H);
+
+      // --- Projection: fit Uusimaa region into the map area ---
+      const mapW = W - margin.left - margin.right;
+      const mapH = H - margin.top - margin.bottom;
+
+      const projection = d3
+        .geoMercator()
+        .center([25.1, 60.35])
+        .scale(22000)
+        .translate([margin.left + mapW / 2, margin.top + mapH / 2]);
+
+      // Bubble size scale (area ~ population)
+      const rScale = d3
+        .scaleSqrt()
+        .domain([0, d3.max(data, (d) => d.pop)])
+        .range([0, 72]);
+
+      // Color scale: light → dark blue by pct change
+      const colorScale = d3
+        .scaleSequential()
+        .domain([0, d3.max(data, (d) => d.pct)])
+        .interpolator(d3.interpolateBlues)
+        .clamp(true);
+
+      // Pre-compute projected positions with cartogram compression
+      const compress = 0.75; // 1 = true geo, lower = more squeezed together
+      const cx = margin.left + mapW / 2;
+      const cy = margin.top + mapH / 2;
+      data.forEach((d) => {
+        const [px, py] = projection([d.lon, d.lat]);
+        d.x = cx + (px - cx) * compress;
+        d.y = cy + (py - cy) * compress;
+        d.r = rScale(d.pop);
+      });
+
+      const g = svg.append("g");
+
+      // Sort bubble so larger go behind
+      data.sort((a, b) => b.pop - a.pop);
+      // Draw bubbles
+      const bubbles = g
+        .selectAll(".bubble")
+        .data(data)
+        .join("circle")
+        .attr("class", "bubble")
+        .attr("cx", (d) => d.x)
+        .attr("cy", (d) => d.y)
+        .attr("r", 0)
+        .attr("fill", (d) => colorScale(d.pct));
+
+      bubbles
+        .transition()
+        .duration(700)
+        .delay((d, i) => i * 40)
+        .attr("r", (d) => d.r);
+
+      // Municipality name — centered below bubble
+      g.selectAll(".label-name")
+        .data(data)
+        .join("text")
+        .attr("class", "label-name")
+        .attr("x", (d) => d.x)
+        .attr("y", (d) => d.y + d.r + 13)
+        .attr("text-anchor", "middle")
+        .attr("fill", "#000")
+        .text((d) => d.name);
+
+      // Pct change — below name
+      g.selectAll(".label-pct")
+        .data(data)
+        .join("text")
+        .attr("class", "label-pct")
+        .attr("x", (d) => d.x)
+        .attr("y", (d) => d.y + d.r + 25)
+        .attr("text-anchor", "middle")
+        .attr("fill", "#000")
+        .text((d) => `+${d.pct}%`);
+
+      // --- Legend (right side) ---
+      const legX = W - margin.right + 20;
+
+      // Color legend
+      svg
+        .append("text")
+        .attr("x", legX)
+        .attr("y", 30)
+        .attr("class", "legend-title")
+        .attr("font-weight", "bold")
+        .text("Myynnin kasvu");
+
+      const gradId = "blueGrad";
+      const defs = svg.append("defs");
+      const grad = defs
+        .append("linearGradient")
+        .attr("id", gradId)
+        .attr("x1", "0")
+        .attr("x2", "0")
+        .attr("y1", "0")
+        .attr("y2", "1");
+      grad
+        .append("stop")
+        .attr("offset", "0%")
+        .attr("stop-color", colorScale(d3.max(data, (d) => d.pct)));
+      grad
+        .append("stop")
+        .attr("offset", "100%")
+        .attr("stop-color", colorScale(0));
+
+      svg
+        .append("rect")
+        .attr("x", legX)
+        .attr("y", 40)
+        .attr("width", 16)
+        .attr("height", 100)
+        .attr("fill", `url(#${gradId})`);
+
+      const pctMax = d3.max(data, (d) => d.pct);
+      const pctMin = d3.min(data, (d) => d.pct);
+      svg
+        .append("text")
+        .attr("x", legX + 22)
+        .attr("y", 52)
+        .attr("font-size", "11px")
+        .attr("fill", "#333")
+        .text(`+${pctMax}%`);
+      svg
+        .append("text")
+        .attr("x", legX + 22)
+        .attr("y", 140)
+        .attr("font-size", "11px")
+        .attr("fill", "#333")
+        .text(`0%`);
+
+      // Size legend
+      svg
+        .append("text")
+        .attr("x", legX)
+        .attr("y", 180)
+        .attr("class", "legend-title")
+        .attr("font-weight", "bold")
+        .text("Väestö");
+
+      const sizeLegData = [659000, 100000, 20000];
+      let legYOffset = 200;
+      sizeLegData.forEach((pop) => {
+        const r = rScale(pop);
+        legYOffset += r;
+        svg
+          .append("circle")
+          .attr("cx", legX + 36)
+          .attr("cy", legYOffset)
+          .attr("r", r)
+          .attr("fill", "none")
+          .attr("stroke", "#999")
+          .attr("stroke-dasharray", "3,2");
+        svg
+          .append("text")
+          .attr("x", legX + 36 + r + 6)
+          .attr("y", legYOffset + 4)
+          .attr("font-size", "11px")
+          .attr("fill", "#555")
+          .text(pop >= 1000 ? `${Math.round(pop / 1000)}k` : pop);
+        legYOffset += r + 8;
+      });
+    </script>
+  </body>
+</html>
