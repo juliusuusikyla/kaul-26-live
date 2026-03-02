@@ -45,8 +45,7 @@
 
       /* Laskuri */
       .laskuri {
-        max-width: 640px;
-        margin: 0 auto;
+        margin: 24px;
         padding: 32px 24px;
       }
       .laskuri h2 {
@@ -120,7 +119,7 @@
         flex: 1;
       }
       .korko-input-wrap {
-        width: 90px;
+        width: 110px;
         flex-shrink: 0;
       }
       .korko-input-wrap input {
@@ -167,7 +166,7 @@
         justify-content: space-between;
         font-size: 0.72rem;
         color: #aaa;
-        padding: 0 calc(90px + 12px) 0 2px;
+        padding: 0 calc(110px + 12px) 0 2px;
       }
       .tulokset {
         background: #f5f8ff;
@@ -314,12 +313,16 @@
         <img src="kaul-26-korkotasot.svg">
       </div>
     </div>
-    <p>Ja vielä asuntlainalaskuri:</p>
+    <p>Ja vielä asuntolainalaskuri:</p>
     <div class="laskuri">
       <h2>
-        Tasakorkolaskuri – kuinka pitkään asuntolainen takaisinmaksussa menee
-        tämänhetkisellä korkotasolla?
+        Tasakorkolaskuri – kuinka kalliiksi lainani muuttuu?
       </h2>
+       <p>Laskurilla voit kokeilla, miten lainan määrä, kokonaisvuosikorko ja kuukausittainen lyhennyserä vaikuttavat tasalyhennyslainan <strong>takaisinmaksuaikaan ja asiakkaan maksamiin korkoihin.</strong></p>
+       <p><strong>Tasalyhennyslaina</strong> on lainan lyhennystapa, jossa lainan pääomaa lyhennetään joka kuukausi kiinteällä, samansuuruisella summalla. Asiakkaan maksama kuukausierä koostuu tästä tasalyhennyserästä, jonka päälle lisätään kuukausittainen korko. Koska korko lasketaan lainan jäljellä olevalle pääomalle, korkokulut pienenevät pääoman laskiessa, ja asiakkaan pankille maksama kuukausierä pienenee ajan saatossa jos korkotaso pysyy samana: </p>
+      <p>
+         3,93% on tämän päivän (30.11.2023) 12 kk Euribor-korko. Lisää määrään pankin marginaali jos haluat tarkastella oman lainasi tilannetta mikäli korko tarkastettaisiin tänään.
+      </p>
 
       <div class="kentat">
         <div class="tavoite-osio">
@@ -333,11 +336,7 @@
 
           <div class="slider-wrap">
             <div class="otsikko">Valitse korko</div>
-            <p>
-              3,93% on tämän päivän (30.11.2023) 12 kk Euribor-korko. Lisää
-              määrään pankin marginaali jos haluat tarkastella oman lainasi
-              tilannetta
-            </p>
+
             <div class="slider-row">
               <input type="range" id="korko" min="0" max="12" step="0.05" value="3.95" style="--pct: 32.92%" />
               <div class="input-wrap korko-input-wrap">
@@ -367,8 +366,10 @@
       <div class="tulokset">
         <div class="tulokset-otsikko">
           Kun lainaa on <span id="otsikko-laina">200 000 €</span> korkotasolla
-          <span class="korko-arvo" id="korko-teksti">3,95 %</span><br />maksat
-          lainaa yhteensä <span class="tulos-arvo iso" id="laina-aika">–</span>
+          <br>
+          <span class="korko-arvo" id="korko-teksti">3,95 %</span><br />
+          <br>maksat lainaa yhteensä <br>
+          <span class="tulos-arvo iso" id="laina-aika">–</span>
         </div>
         <div class="bar-labels">
           <span>
