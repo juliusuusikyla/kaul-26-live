@@ -11,7 +11,7 @@
       }
     </style>
   </head>
-  <body>
+  <body style="font-family: sans-serif;">
     <h2>Pääkaupunkiseudun ulkopuolella kauppa käy</h2>
     <h3>Asuntokauppojen määrä 1–9/2025, %-muutos viime vuodesta</h3>
     <div id="chart"></div>
@@ -31,7 +31,8 @@
         .select("#chart")
         .append("svg")
         .attr("width", width)
-        .attr("height", height);
+        .attr("height", height)
+        .style("font-family", "sans-serif");
 
       svg
         .append("defs")
@@ -77,7 +78,7 @@
       }));
 
       (() => {
-        const color = { "pk-seutu": "#7c3aed", uusimaa: "#86efac" };
+        const color = { "pk-seutu": "#2171b5", uusimaa: "#9ecae1" };
 
         // Sort descending by value
         data.sort((a, b) => b.value - a.value);
@@ -164,16 +165,12 @@
           .delay((d, i) => i * 80)
           .attr("x", (d) => x(d.value) + 6);
 
-        // 8. Kauniainen annotation — placed below the chart
-        const ky = y("Kauniainen");
-        const bw = y.bandwidth();
-        const annoX = x(46);
-        const annoY = innerH + 45 - innerH * 0.35;
+        // 8. Average annotation — placed below the chart, pointing at x=20
+        const annoX = x(20);
+        const annoY = innerH + 50;
         const annoLines = [
-          "Pienellä paikkakunnalla",
-          "kauppamäärät ovat alhaisia,",
-          "joten prosentuaalinen",
-          "muutos voi näyttäytyä suurelta.",
+          "Koko Uusimaan keskiarvo vajaa 20%",
+          "(tähän etsisin tarkan luvun)",
         ];
 
         const anno = g
@@ -193,16 +190,39 @@
             .text(line);
         });
 
-        // curved arrow from annotation up to just below Kauniainen bar on left axis
+        // arrow pointing from annotation up to x=20 on the bottom axis
         g.append("path")
           .attr(
             "d",
-            `M ${annoX},${annoY - 7} C ${annoX + 20},${innerH / 2} ${x(46) + 10},${ky + bw} ${x(46)},${ky + bw / 2}`,
+            `M ${annoX},${annoY - 10} C ${annoX},${innerH + 20} ${annoX},${innerH + 5} ${annoX},${innerH}`,
           )
           .attr("fill", "none")
           .attr("stroke", "#555")
           .attr("stroke-width", 1)
           .attr("marker-end", "url(#arrow)");
+
+        // 9. Legend — bottom-right of chart area
+        const legendX = innerW + 20;
+        const legendY = innerH - 45;
+        const legendData = [
+          { key: "pk-seutu", label: "Pääkaupunkiseutu" },
+          { key: "uusimaa", label: "Muu Uusimaa" },
+        ];
+        const legG = g.append("g").attr("transform", `translate(${legendX},${legendY})`);
+        legendData.forEach((item, i) => {
+          const row = legG.append("g").attr("transform", `translate(0,${i * 20})`);
+          row.append("rect")
+            .attr("width", 12)
+            .attr("height", 12)
+            .attr("rx", 2)
+            .attr("fill", color[item.key]);
+          row.append("text")
+            .attr("x", 18)
+            .attr("y", 10)
+            .attr("font-size", "11px")
+            .attr("fill", "#333")
+            .text(item.label);
+        });
       })();
     </script>
   </body>

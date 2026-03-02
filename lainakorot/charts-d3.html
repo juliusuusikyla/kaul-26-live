@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="fi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Euribor-korot</title>
+    <style>
+      body {
+        max-width: 960px;
+        margin: 40px auto;
+        background: #fff;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+      .chart-wrap {
+        margin: 60px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="chart-wrap" id="chart1"></div>
+    <div class="chart-wrap" id="chart2"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+    <script>
+      const DATA = [
+        {"date":"2023-06-01","m3":3.462,"m6":3.721,"m12":3.875},
+        {"date":"2023-06-02","m3":3.49,"m6":3.728,"m12":3.875},
+        {"date":"2023-06-05","m3":3.493,"m6":3.739,"m12":3.884},
+        {"date":"2023-06-06","m3":3.476,"m6":3.715,"m12":3.914},
+        {"date":"2023-06-07","m3":3.459,"m6":3.733,"m12":3.923},
+        {"date":"2023-06-08","m3":3.486,"m6":3.757,"m12":3.936},
+        {"date":"2023-06-09","m3":3.469,"m6":3.762,"m12":3.928},
+        {"date":"2023-06-12","m3":3.478,"m6":3.753,"m12":3.938},
+        {"date":"2023-06-13","m3":3.526,"m6":3.794,"m12":3.942},
+        {"date":"2023-06-14","m3":3.522,"m6":3.79,"m12":3.944},
+        {"date":"2023-06-15","m3":3.547,"m6":3.818,"m12":3.965},
+        {"date":"2023-06-16","m3":3.572,"m6":3.822,"m12":4.02},
+        {"date":"2023-06-19","m3":3.551,"m6":3.861,"m12":4.046},
+        {"date":"2023-06-20","m3":3.587,"m6":3.892,"m12":4.082},
+        {"date":"2023-06-21","m3":3.568,"m6":3.886,"m12":4.088},
+        {"date":"2023-06-22","m3":3.6,"m6":3.907,"m12":4.111},
+        {"date":"2023-06-23","m3":3.61,"m6":3.933,"m12":4.147},
+        {"date":"2023-06-26","m3":3.577,"m6":3.908,"m12":4.092},
+        {"date":"2023-06-27","m3":3.554,"m6":3.915,"m12":4.094},
+        {"date":"2023-06-28","m3":3.598,"m6":3.93,"m12":4.119},
+        {"date":"2023-06-29","m3":3.587,"m6":3.892,"m12":4.103},
+        {"date":"2023-06-30","m3":3.577,"m6":3.9,"m12":4.134},
+        {"date":"2023-07-03","m3":3.597,"m6":3.913,"m12":4.145},
+        {"date":"2023-07-04","m3":3.613,"m6":3.888,"m12":4.164},
+        {"date":"2023-07-05","m3":3.589,"m6":3.895,"m12":4.165},
+        {"date":"2023-07-06","m3":3.612,"m6":3.905,"m12":4.155},
+        {"date":"2023-07-07","m3":3.64,"m6":3.945,"m12":4.193},
+        {"date":"2023-07-10","m3":3.661,"m6":3.931,"m12":4.19},
+        {"date":"2023-07-11","m3":3.672,"m6":3.94,"m12":4.184},
+        {"date":"2023-07-12","m3":3.657,"m6":3.955,"m12":4.191},
+        {"date":"2023-07-13","m3":3.663,"m6":3.945,"m12":4.174},
+        {"date":"2023-07-14","m3":3.66,"m6":3.941,"m12":4.134},
+        {"date":"2023-07-17","m3":3.685,"m6":3.962,"m12":4.15},
+        {"date":"2023-07-18","m3":3.705,"m6":3.962,"m12":4.16},
+        {"date":"2023-07-19","m3":3.646,"m6":3.937,"m12":4.121},
+        {"date":"2023-07-20","m3":3.698,"m6":3.952,"m12":4.141},
+        {"date":"2023-07-21","m3":3.721,"m6":3.972,"m12":4.162},
+        {"date":"2023-07-24","m3":3.716,"m6":3.972,"m12":4.158},
+        {"date":"2023-07-25","m3":3.705,"m6":3.966,"m12":4.114},
+        {"date":"2023-07-26","m3":3.714,"m6":3.952,"m12":4.114},
+        {"date":"2023-07-27","m3":3.714,"m6":3.972,"m12":4.14},
+        {"date":"2023-07-28","m3":3.725,"m6":3.958,"m12":4.111},
+        {"date":"2023-07-31","m3":3.715,"m6":3.929,"m12":4.064},
+        {"date":"2023-08-01","m3":3.723,"m6":3.948,"m12":4.076},
+        {"date":"2023-08-02","m3":3.733,"m6":3.944,"m12":4.081},
+        {"date":"2023-08-03","m3":3.722,"m6":3.937,"m12":4.052},
+        {"date":"2023-08-04","m3":3.743,"m6":3.94,"m12":4.045},
+        {"date":"2023-08-07","m3":3.754,"m6":3.949,"m12":4.055},
+        {"date":"2023-08-08","m3":3.765,"m6":3.921,"m12":4.065},
+        {"date":"2023-08-09","m3":3.759,"m6":3.927,"m12":4.053},
+        {"date":"2023-08-10","m3":3.788,"m6":3.937,"m12":4.052},
+        {"date":"2023-08-11","m3":3.781,"m6":3.928,"m12":4.056},
+        {"date":"2023-08-14","m3":3.799,"m6":3.957,"m12":4.076},
+        {"date":"2023-08-15","m3":3.787,"m6":3.943,"m12":4.091},
+        {"date":"2023-08-16","m3":3.798,"m6":3.964,"m12":4.116},
+        {"date":"2023-08-17","m3":3.815,"m6":3.941,"m12":4.095},
+        {"date":"2023-08-18","m3":3.816,"m6":3.944,"m12":4.091},
+        {"date":"2023-08-21","m3":3.806,"m6":3.941,"m12":4.082},
+        {"date":"2023-08-22","m3":3.808,"m6":3.951,"m12":4.106},
+        {"date":"2023-08-23","m3":3.826,"m6":3.953,"m12":4.082},
+        {"date":"2023-08-24","m3":3.784,"m6":3.932,"m12":4.048},
+        {"date":"2023-08-25","m3":3.788,"m6":3.935,"m12":4.045},
+        {"date":"2023-08-28","m3":3.771,"m6":3.944,"m12":4.07},
+        {"date":"2023-08-29","m3":3.783,"m6":3.944,"m12":4.074},
+        {"date":"2023-08-30","m3":3.803,"m6":3.956,"m12":4.065},
+        {"date":"2023-08-31","m3":3.795,"m6":3.987,"m12":4.102},
+        {"date":"2023-09-01","m3":3.77,"m6":3.934,"m12":4.055},
+        {"date":"2023-09-04","m3":3.798,"m6":3.955,"m12":4.049},
+        {"date":"2023-09-05","m3":3.802,"m6":3.938,"m12":4.068},
+        {"date":"2023-09-06","m3":3.795,"m6":3.929,"m12":4.051},
+        {"date":"2023-09-07","m3":3.799,"m6":3.938,"m12":4.078},
+        {"date":"2023-09-08","m3":3.8,"m6":3.952,"m12":4.086},
+        {"date":"2023-09-11","m3":3.822,"m6":3.97,"m12":4.081},
+        {"date":"2023-09-12","m3":3.824,"m6":3.968,"m12":4.103},
+        {"date":"2023-09-13","m3":3.845,"m6":3.999,"m12":4.112},
+        {"date":"2023-09-14","m3":3.867,"m6":4.04,"m12":4.159},
+        {"date":"2023-09-15","m3":3.878,"m6":4.055,"m12":4.169},
+        {"date":"2023-09-18","m3":3.903,"m6":4.066,"m12":4.191},
+        {"date":"2023-09-19","m3":3.934,"m6":4.071,"m12":4.216},
+        {"date":"2023-09-20","m3":3.934,"m6":4.07,"m12":4.222},
+        {"date":"2023-09-21","m3":3.955,"m6":4.072,"m12":4.224},
+        {"date":"2023-09-22","m3":3.958,"m6":4.082,"m12":4.213},
+        {"date":"2023-09-25","m3":3.977,"m6":4.122,"m12":4.208},
+        {"date":"2023-09-26","m3":3.941,"m6":4.09,"m12":4.199},
+        {"date":"2023-09-27","m3":3.972,"m6":4.136,"m12":4.2},
+        {"date":"2023-09-28","m3":3.955,"m6":4.125,"m12":4.221},
+        {"date":"2023-09-29","m3":3.952,"m6":4.125,"m12":4.228},
+        {"date":"2023-10-02","m3":3.951,"m6":4.138,"m12":4.198},
+        {"date":"2023-10-03","m3":3.964,"m6":4.128,"m12":4.208},
+        {"date":"2023-10-04","m3":3.962,"m6":4.13,"m12":4.212},
+        {"date":"2023-10-05","m3":3.972,"m6":4.125,"m12":4.212},
+        {"date":"2023-10-06","m3":3.983,"m6":4.113,"m12":4.194},
+        {"date":"2023-10-09","m3":3.98,"m6":4.129,"m12":4.187},
+        {"date":"2023-10-10","m3":3.988,"m6":4.112,"m12":4.155},
+        {"date":"2023-10-11","m3":3.952,"m6":4.114,"m12":4.145},
+        {"date":"2023-10-12","m3":3.965,"m6":4.121,"m12":4.162},
+        {"date":"2023-10-13","m3":3.985,"m6":4.121,"m12":4.171},
+        {"date":"2023-10-16","m3":3.975,"m6":4.103,"m12":4.172},
+        {"date":"2023-10-17","m3":3.972,"m6":4.118,"m12":4.16},
+        {"date":"2023-10-18","m3":3.993,"m6":4.143,"m12":4.196},
+        {"date":"2023-10-19","m3":4.002,"m6":4.126,"m12":4.184},
+        {"date":"2023-10-20","m3":3.969,"m6":4.107,"m12":4.185},
+        {"date":"2023-10-23","m3":3.956,"m6":4.096,"m12":4.145},
+        {"date":"2023-10-24","m3":3.941,"m6":4.102,"m12":4.154},
+        {"date":"2023-10-25","m3":3.938,"m6":4.092,"m12":4.118},
+        {"date":"2023-10-26","m3":3.952,"m6":4.105,"m12":4.128},
+        {"date":"2023-10-27","m3":3.948,"m6":4.102,"m12":4.104},
+        {"date":"2023-10-30","m3":3.968,"m6":4.109,"m12":4.078},
+        {"date":"2023-10-31","m3":3.972,"m6":4.092,"m12":4.052},
+        {"date":"2023-11-01","m3":3.953,"m6":4.081,"m12":4.044},
+        {"date":"2023-11-02","m3":3.974,"m6":4.072,"m12":4.012},
+        {"date":"2023-11-03","m3":3.956,"m6":4.062,"m12":4.004},
+        {"date":"2023-11-06","m3":3.963,"m6":4.066,"m12":4.022},
+        {"date":"2023-11-07","m3":3.966,"m6":4.072,"m12":4.028},
+        {"date":"2023-11-08","m3":3.973,"m6":4.066,"m12":4.027},
+        {"date":"2023-11-09","m3":3.987,"m6":4.055,"m12":4.028},
+        {"date":"2023-11-10","m3":3.992,"m6":4.074,"m12":4.04},
+        {"date":"2023-11-13","m3":4.002,"m6":4.085,"m12":4.04},
+        {"date":"2023-11-14","m3":3.997,"m6":4.097,"m12":4.064},
+        {"date":"2023-11-15","m3":3.994,"m6":4.076,"m12":4.028},
+        {"date":"2023-11-16","m3":4.002,"m6":4.071,"m12":4.033},
+        {"date":"2023-11-17","m3":3.984,"m6":4.064,"m12":3.991},
+        {"date":"2023-11-20","m3":3.962,"m6":4.058,"m12":4.015},
+        {"date":"2023-11-21","m3":3.973,"m6":4.07,"m12":4.023},
+        {"date":"2023-11-22","m3":3.962,"m6":4.063,"m12":4.016},
+        {"date":"2023-11-23","m3":3.956,"m6":4.062,"m12":4.034},
+        {"date":"2023-11-24","m3":3.935,"m6":4.074,"m12":4.056},
+        {"date":"2023-11-27","m3":3.951,"m6":4.05,"m12":4.057},
+        {"date":"2023-11-28","m3":3.955,"m6":4.026,"m12":4.015},
+        {"date":"2023-11-29","m3":3.975,"m6":4.05,"m12":3.983},
+        {"date":"2023-11-30","m3":3.964,"m6":4.029,"m12":3.926}
+      ];
+
+      const FI_MONTHS = [
+        "tammi","helmi","maalis","huhti","touko","kesä",
+        "heinä","elo","syys","loka","marras","joulu"
+      ];
+
+      function fiMonthFmt(d) {
+        return FI_MONTHS[d.getMonth()];
+      }
+
+      function drawChart(containerId, rawData, opts) {
+        const {
+          title,          // string or [line1, line2]
+          subtitle,       // string or null
+          source = "Lähde: Suomen Pankki",
+          svgWidth = 700,
+          innerHeight = 265,
+          xTickInterval = d3.timeMonth.every(1),
+          xTickFmt = fiMonthFmt,
+        } = opts;
+
+        const titleArr = Array.isArray(title) ? title : [title];
+        const titleLineH = 22;
+        const titleH = titleArr.length * titleLineH;
+        const subtitleH = subtitle ? 20 : 0;
+        const margin = {
+          top: 16 + titleH + subtitleH + 10,
+          right: 72,
+          bottom: 36,
+          left: 46,
+        };
+        const sourceH = source ? 24 : 0;
+        const svgHeight = margin.top + innerHeight + margin.bottom + sourceH;
+
+        const parseDate = d3.timeParse("%Y-%m-%d");
+        const data = rawData.map(d => ({
+          date: parseDate(d.date),
+          m3: +d.m3,
+          m6: +d.m6,
+          m12: +d.m12,
+        }));
+
+        const innerW = svgWidth - margin.left - margin.right;
+
+        const svg = d3.select(`#${containerId}`)
+          .append("svg")
+          .attr("xmlns", "http://www.w3.org/2000/svg")
+          .attr("width", svgWidth)
+          .attr("height", svgHeight)
+          .attr("viewBox", `0 0 ${svgWidth} ${svgHeight}`);
+
+        // ── Title ──────────────────────────────────────────────────
+        const titleG = svg.append("text")
+          .attr("font-family", "Arial, Helvetica, sans-serif")
+          .attr("font-size", "17")
+          .attr("font-weight", "bold")
+          .attr("fill", "#1a1a2e");
+
+        titleArr.forEach((line, i) => {
+          titleG.append("tspan")
+            .attr("x", margin.left)
+            .attr("y", 16 + titleLineH + i * titleLineH)
+            .text(line);
+        });
+
+        if (subtitle) {
+          svg.append("text")
+            .attr("x", margin.left)
+            .attr("y", 16 + titleH + titleLineH + subtitleH - 4)
+            .attr("font-family", "Arial, Helvetica, sans-serif")
+            .attr("font-size", "12")
+            .attr("fill", "#888")
+            .text(subtitle);
+        }
+
+        // ── Chart area ─────────────────────────────────────────────
+        const g = svg.append("g")
+          .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        // ── Scales ─────────────────────────────────────────────────
+        const x = d3.scaleTime()
+          .domain(d3.extent(data, d => d.date))
+          .range([0, innerW]);
+
+        const allVals = data.flatMap(d => [d.m3, d.m6, d.m12]);
+        const y = d3.scaleLinear()
+          .domain([d3.min(allVals), d3.max(allVals)])
+          .range([innerHeight, 0])
+          .nice();
+
+        // ── Horizontal grid lines ───────────────────────────────────
+        g.selectAll(".grid")
+          .data(y.ticks(5))
+          .join("line")
+          .attr("x1", 0).attr("x2", innerW)
+          .attr("y1", d => y(d)).attr("y2", d => y(d))
+          .attr("stroke", "#ebebeb")
+          .attr("stroke-width", 1);
+
+        // ── Axes ────────────────────────────────────────────────────
+        // X
+        const xAxisG = g.append("g")
+          .attr("transform", `translate(0,${innerHeight})`)
+          .call(
+            d3.axisBottom(x)
+              .ticks(xTickInterval)
+              .tickFormat(xTickFmt)
+              .tickSizeOuter(0)
+              .tickSizeInner(4)
+          );
+        xAxisG.select(".domain").attr("stroke", "#ccc");
+        xAxisG.selectAll(".tick line").attr("stroke", "#ccc");
+        xAxisG.selectAll("text")
+          .attr("font-family", "Arial, Helvetica, sans-serif")
+          .attr("font-size", "11")
+          .attr("fill", "#888");
+
+        // Y
+        const yAxisG = g.append("g")
+          .call(
+            d3.axisLeft(y)
+              .ticks(5)
+              .tickFormat(d => d.toFixed(2) + " %")
+              .tickSizeOuter(0)
+              .tickSizeInner(0)
+          );
+        yAxisG.select(".domain").remove();
+        yAxisG.selectAll("text")
+          .attr("font-family", "Arial, Helvetica, sans-serif")
+          .attr("font-size", "11")
+          .attr("fill", "#888")
+          .attr("dx", "-3");
+
+        // ── Lines ───────────────────────────────────────────────────
+        const lineGen = (key) =>
+          d3.line()
+            .x(d => x(d.date))
+            .y(d => y(d[key]))
+            .curve(d3.curveStepAfter)(data);
+
+        const SERIES = [
+          { key: "m3",  label: "3 kk",  color: "#c0c0c0", sw: 1.5 },
+          { key: "m6",  label: "6 kk",  color: "#c0c0c0", sw: 1.5 },
+          { key: "m12", label: "12 kk", color: "#c0392b", sw: 2.5 },
+        ];
+
+        SERIES.forEach(s => {
+          g.append("path")
+            .attr("fill", "none")
+            .attr("stroke", s.color)
+            .attr("stroke-width", s.sw)
+            .attr("stroke-linejoin", "round")
+            .attr("stroke-linecap", "round")
+            .attr("d", lineGen(s.key));
+        });
+
+        // ── Dots on red (12 kk) line: first, max, last ──────────────
+        const first12 = data[0];
+        const last12  = data[data.length - 1];
+        const max12   = data.reduce((best, d) => d.m12 > best.m12 ? d : best, data[0]);
+
+        // Deduplicate in case first/last coincide with max
+        const dotPoints = [first12, max12, last12]
+          .filter((d, i, arr) => arr.findIndex(p => p.date === d.date) === i);
+
+        dotPoints.forEach(d => {
+          const cx = x(d.date);
+          const cy = y(d.m12);
+
+          // ── Vertical placement: above unless too close to top edge ──
+          const above = cy > 38;
+          const labelDy = above ? -10 : 16;
+
+          // ── Horizontal anchor: guard against left/right edges ───────
+          const anchor = cx < 50 ? "start" : cx > innerW - 50 ? "end" : "middle";
+          const labelDx = cx < 50 ? 4 : cx > innerW - 50 ? -4 : 0;
+
+          // White halo
+          g.append("circle")
+            .attr("cx", cx).attr("cy", cy).attr("r", 5).attr("fill", "#fff");
+          // Coloured dot
+          g.append("circle")
+            .attr("cx", cx).attr("cy", cy).attr("r", 3.5).attr("fill", "#c0392b");
+          // Value label
+          g.append("text")
+            .attr("x", cx + labelDx)
+            .attr("y", cy + labelDy)
+            .attr("text-anchor", anchor)
+            .attr("font-family", "Arial, Helvetica, sans-serif")
+            .attr("font-size", "12")
+            .attr("font-weight", "bold")
+            .attr("fill", "#c0392b")
+            .text(d.m12.toFixed(2).replace(".", ",") + "\u00a0%");
+        });
+
+        // ── End labels (with collision nudge) ───────────────────────
+        const last = data[data.length - 1];
+        const labelX = x(last.date) + 7;
+
+        // Build sorted label positions, nudge overlaps
+        const MIN_GAP = 13;
+        let labels = SERIES.map(s => ({
+          ...s,
+          rawY: y(last[s.key]),
+          nudgedY: y(last[s.key]),
+        })).sort((a, b) => a.rawY - b.rawY); // top to bottom
+
+        // Downward pass: push down any that are too close
+        for (let i = 1; i < labels.length; i++) {
+          if (labels[i].nudgedY < labels[i - 1].nudgedY + MIN_GAP) {
+            labels[i].nudgedY = labels[i - 1].nudgedY + MIN_GAP;
+          }
+        }
+        // Upward pass: push up if out of bounds
+        for (let i = labels.length - 2; i >= 0; i--) {
+          if (labels[i].nudgedY > labels[i + 1].nudgedY - MIN_GAP) {
+            labels[i].nudgedY = labels[i + 1].nudgedY - MIN_GAP;
+          }
+        }
+
+        labels.forEach(s => {
+          g.append("text")
+            .attr("x", labelX)
+            .attr("y", s.nudgedY)
+            .attr("dy", "0.35em")
+            .attr("font-family", "Arial, Helvetica, sans-serif")
+            .attr("font-size", "12")
+            .attr("font-weight", s.key === "m12" ? "bold" : "normal")
+            .attr("fill", s.color)
+            .text(s.label);
+        });
+
+        // ── Source ──────────────────────────────────────────────────
+        if (source) {
+          svg.append("text")
+            .attr("x", margin.left)
+            .attr("y", svgHeight - 6)
+            .attr("font-family", "Arial, Helvetica, sans-serif")
+            .attr("font-size", "11")
+            .attr("fill", "#bbb")
+            .text(source);
+        }
+      }
+
+      // ── Chart 1: full range ──────────────────────────────────────
+      drawChart("chart1", DATA, {
+        title: [
+          "Korot nousussa \u2013 12kk euribor kuitenkin",
+          "viittaa tulevaan laskuun"
+        ],
+        subtitle: "3, 6 ja 12 kuukauden euribor, %",
+        xTickInterval: d3.timeMonth.every(1),
+        xTickFmt: fiMonthFmt,
+      });
+
+      // ── Chart 2: from Sep 29 peak to end ────────────────────────
+      const peakDate = "2023-09-29";
+      drawChart("chart2", DATA.filter(d => d.date >= peakDate), {
+        title: "Pitkät korot laskussa syyskuun huippulukemista",
+        subtitle: "3, 6 ja 12 kuukauden euribor, %",
+        xTickInterval: d3.timeWeek.every(2),
+        xTickFmt: d => `${d.getDate()}. ${FI_MONTHS[d.getMonth()]}`,
+      });
+    </script>
+  </body>
+</html>
