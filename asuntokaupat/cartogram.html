@@ -6,7 +6,9 @@
     <title>Asuntokaupat – karttavisualisaatio</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
     <style>
-      * { box-sizing: border-box; }
+      * {
+        box-sizing: border-box;
+      }
       body {
         font-family: sans-serif;
         background: #f9f9f7;
@@ -14,9 +16,15 @@
         padding: 0;
       }
       header {
-        padding: 20px 20px 0;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: #f9f9f7;
+        padding: 20px 20px 8px;
       }
-      h2 { margin-bottom: 4px; }
+      h2 {
+        margin-bottom: 4px;
+      }
       h3 {
         margin-top: 0;
         font-weight: normal;
@@ -54,12 +62,22 @@
         padding: 12px 20px 20px;
       }
 
+      /* ── Story text ── */
+      .story-text {
+        max-width: 640px;
+        margin: 0 auto;
+        padding: 40px 20px;
+        font-size: 16px;
+        line-height: 1.6;
+        color: #333;
+      }
+
       /* ── Scroll layout ── */
-      #scroll-zone {
+      .scrolly-zone {
         position: relative;
         /* height set by JS: 100vh + data.length * STEP_PX */
       }
-      #sticky-chart {
+      .sticky-chart {
         position: sticky;
         top: 0;
         height: 100vh;
@@ -67,59 +85,72 @@
         align-items: center;
         justify-content: center;
       }
-      #sticky-chart svg {
+      .sticky-chart svg {
         max-width: 100%;
         height: auto;
       }
     </style>
   </head>
   <body>
-    <header>
-      <h2>Asuntojen myyntiluvuissa nousua – kuntien välillä eroja</h2>
-      <h3>Asuntokauppojen määrä 1–9/2025, %-muutos viime vuodesta</h3>
-      <p style="font-size:13px;color:#666;margin-top:0">Ympyrän koko = väestö. Väri = myynnin kasvu (vaalea → tumma sininen).</p>
-    </header>
+    <div class="story-text">
+      <p><!-- intro text before chart --></p>
+    </div>
 
-    <div id="scroll-zone">
-      <div id="sticky-chart">
+    <div id="scrolly-1" class="scrolly-zone">
+      <header>
+        <h2>Asuntojen myyntiluvuissa nousua – kuntien välillä eroja</h2>
+        <h3>Asuntokauppojen määrä 1–9/2025, %-muutos viime vuodesta</h3>
+        <p style="font-size: 13px; color: #666; margin-top: 0">
+          Ympyrän koko = väestö. Väri = myynnin kasvu (vaalea → tumma sininen).
+        </p>
+      </header>
+      <div class="sticky-chart">
         <div id="chart"></div>
       </div>
     </div>
 
-    <p class="footnote">Lähteet: KVKL, OP Uusimaa, Tilastokeskus. Tekijä: Julius Uusikylä</p>
+    <div class="story-text">
+      <p><!-- analysis text after chart --></p>
+    </div>
+
+    <p class="footnote">
+      Lähteet: KVKL, OP Uusimaa, Tilastokeskus. Tekijä: Julius Uusikylä
+    </p>
 
     <script>
       const data = [
-        { name: "Inkoo",       pct: 43, pop:   5600, lat: 60.05, lon: 24.0  },
-        { name: "Kerava",      pct: 41, pop:  37000, lat: 60.4,  lon: 25.1  },
-        { name: "Mäntsälä",    pct: 36, pop:  21000, lat: 60.63, lon: 25.32 },
-        { name: "Kirkkonummi", pct: 31, pop:  39000, lat: 60.13, lon: 24.43 },
-        { name: "Järvenpää",   pct: 23, pop:  43000, lat: 60.47, lon: 25.08 },
-        { name: "Loviisa",     pct: 23, pop:  15000, lat: 60.45, lon: 26.22 },
-        { name: "Hyvinkää",    pct: 22, pop:  46000, lat: 60.63, lon: 24.85 },
-        { name: "Nurmijärvi",  pct: 20, pop:  43000, lat: 60.47, lon: 24.8  },
-        { name: "Karkkila",    pct: 18, pop:   8500, lat: 60.53, lon: 24.22 },
-        { name: "Porvoo",      pct: 17, pop:  52000, lat: 60.39, lon: 25.66 },
-        { name: "Lohja",       pct: 17, pop:  48000, lat: 60.25, lon: 24.07 },
-        { name: "Vihti",       pct: 15, pop:  29000, lat: 60.42, lon: 24.35 },
-        { name: "Sipoo",       pct: 13, pop:  21000, lat: 60.37, lon: 25.27 },
-        { name: "Kauniainen",  pct: 46, pop:  10000, lat: 60.21, lon: 24.73 },
-        { name: "Vantaa",      pct: 24, pop: 244000, lat: 60.3,  lon: 25.0  },
-        { name: "Espoo",       pct: 21, pop: 306000, lat: 60.21, lon: 24.66 },
-        { name: "Helsinki",    pct: 17, pop: 659000, lat: 60.17, lon: 24.94 },
+        { name: "Inkoo", pct: 43, pop: 5600, lat: 60.05, lon: 24.0 },
+        { name: "Kerava", pct: 41, pop: 37000, lat: 60.4, lon: 25.1 },
+        { name: "Mäntsälä", pct: 36, pop: 21000, lat: 60.63, lon: 25.32 },
+        { name: "Kirkkonummi", pct: 31, pop: 39000, lat: 60.13, lon: 24.43 },
+        { name: "Järvenpää", pct: 23, pop: 43000, lat: 60.47, lon: 25.08 },
+        { name: "Loviisa", pct: 23, pop: 15000, lat: 60.45, lon: 26.22 },
+        { name: "Hyvinkää", pct: 22, pop: 46000, lat: 60.63, lon: 24.85 },
+        { name: "Nurmijärvi", pct: 20, pop: 43000, lat: 60.47, lon: 24.8 },
+        { name: "Karkkila", pct: 18, pop: 8500, lat: 60.53, lon: 24.22 },
+        { name: "Porvoo", pct: 17, pop: 52000, lat: 60.39, lon: 25.66 },
+        { name: "Lohja", pct: 17, pop: 48000, lat: 60.25, lon: 24.07 },
+        { name: "Vihti", pct: 15, pop: 29000, lat: 60.42, lon: 24.35 },
+        { name: "Sipoo", pct: 13, pop: 21000, lat: 60.37, lon: 25.27 },
+        { name: "Kauniainen", pct: 46, pop: 10000, lat: 60.21, lon: 24.73 },
+        { name: "Vantaa", pct: 24, pop: 244000, lat: 60.3, lon: 25.0 },
+        { name: "Espoo", pct: 21, pop: 306000, lat: 60.21, lon: 24.66 },
+        { name: "Helsinki", pct: 17, pop: 659000, lat: 60.17, lon: 24.94 },
       ];
 
       // How many pixels of scrolling per bubble reveal
-      const STEP_PX = 280;
+      const STEP_PX = 200;
 
       // Make the scroll zone tall enough for all bubbles
-      document.getElementById("scroll-zone").style.height =
+      document.getElementById("scrolly-1").style.height =
         `calc(100vh + ${data.length * STEP_PX}px)`;
 
-      const W = 1020, H = 560;
-      const margin = { top: 20, right: 200, bottom: 20, left: 20 };
+      const W = 1020,
+        H = 560;
+      const margin = { top: 20, right: 20, bottom: 20, left: 20 };
 
-      const svg = d3.select("#chart")
+      const svg = d3
+        .select("#chart")
         .append("svg")
         .attr("viewBox", `0 0 ${W} ${H}`)
         .attr("width", W)
@@ -128,130 +159,139 @@
       const mapW = W - margin.left - margin.right;
       const mapH = H - margin.top - margin.bottom;
 
-      const projection = d3.geoMercator()
+      const projection = d3
+        .geoMercator()
         .center([25.1, 60.35])
         .scale(22000)
         .translate([margin.left + mapW / 2, margin.top + mapH / 2]);
 
-      const rScale = d3.scaleSqrt()
-        .domain([0, d3.max(data, d => d.pop)])
+      const rScale = d3
+        .scaleSqrt()
+        .domain([0, d3.max(data, (d) => d.pop)])
         .range([0, 72]);
 
-      const colorScale = d3.scaleSequential()
-        .domain([0, d3.max(data, d => d.pct)])
+      const colorScale = d3
+        .scaleSequential()
+        .domain([0, d3.max(data, (d) => d.pct)])
         .interpolator(d3.interpolateBlues)
         .clamp(true);
 
       const compress = 0.75;
       const cx = margin.left + mapW / 2;
       const cy = margin.top + mapH / 2;
-      data.forEach(d => {
+      data.forEach((d) => {
         const [px, py] = projection([d.lon, d.lat]);
         d.x = cx + (px - cx) * compress;
         d.y = cy + (py - cy) * compress;
         d.r = rScale(d.pop);
       });
 
-      // Sort largest first — this is the reveal order
+      // Drawing order: largest pop first → drawn first → sits behind smaller bubbles
       data.sort((a, b) => b.pop - a.pop);
 
       const g = svg.append("g");
 
-      const bubbles = g.selectAll(".bubble")
+      const bubbles = g
+        .selectAll(".bubble")
         .data(data)
         .join("circle")
         .attr("class", "bubble")
-        .attr("cx", d => d.x)
-        .attr("cy", d => d.y)
+        .attr("cx", (d) => d.x)
+        .attr("cy", (d) => d.y)
         .attr("r", 0)
-        .attr("fill", d => colorScale(d.pct));
+        .attr("fill", (d) => colorScale(d.pct));
 
-      const nameLabels = g.selectAll(".label-name")
+      const nameLabels = g
+        .selectAll(".label-name")
         .data(data)
         .join("text")
         .attr("class", "label-name")
-        .attr("x", d => d.x)
-        .attr("y", d => d.y + d.r + 13)
+        .attr("x", (d) => d.x)
+        .attr("y", (d) => d.y + d.r + 13)
         .attr("text-anchor", "middle")
         .attr("opacity", 0)
-        .text(d => d.name);
+        .text((d) => d.name);
 
-      const pctLabels = g.selectAll(".label-pct")
+      const pctLabels = g
+        .selectAll(".label-pct")
         .data(data)
         .join("text")
         .attr("class", "label-pct")
-        .attr("x", d => d.x)
-        .attr("y", d => d.y + d.r + 25)
+        .attr("x", (d) => d.x)
+        .attr("y", (d) => d.y + d.r + 25)
         .attr("text-anchor", "middle")
         .attr("opacity", 0)
-        .text(d => `+${d.pct}%`);
+        .text((d) => `+${d.pct}%`);
 
-      // --- Legend ---
-      const legX = W - margin.right + 20;
+      // Reveal order: highest pct first — maps scroll step → index in data/DOM
+      // data is sorted by pop, so we need to find where each pct-ranked item sits
+      const revealSequence = data
+        .map((d, i) => ({ pct: d.pct, i }))
+        .sort((a, b) => b.pct - a.pct)
+        .map(item => item.i);
 
-      svg.append("text").attr("x", legX).attr("y", 30)
-        .attr("class", "legend-title").attr("font-weight", "bold")
-        .text("Myynnin kasvu");
+      // --- SVG tooltip (positioned at data point, centered above bubble) ---
+      const tipG = svg.append("g").style("display", "none").style("pointer-events", "none");
+      const tipRect = tipG.append("rect")
+        .attr("fill", "#fff")
+        .attr("stroke", "#ddd")
+        .attr("rx", 2);
+      const tipText = tipG.append("text")
+        .attr("text-anchor", "middle")
+        .attr("font-size", "11px")
+        .attr("fill", "#333");
 
-      const gradId = "blueGrad";
-      const defs = svg.append("defs");
-      const grad = defs.append("linearGradient")
-        .attr("id", gradId).attr("x1","0").attr("x2","0").attr("y1","0").attr("y2","1");
-      grad.append("stop").attr("offset","0%")
-        .attr("stop-color", colorScale(d3.max(data, d => d.pct)));
-      grad.append("stop").attr("offset","100%")
-        .attr("stop-color", colorScale(0));
-
-      svg.append("rect").attr("x", legX).attr("y", 40)
-        .attr("width", 16).attr("height", 100).attr("fill", `url(#${gradId})`);
-
-      svg.append("text").attr("x", legX+22).attr("y", 52)
-        .attr("font-size","11px").attr("fill","#333")
-        .text(`+${d3.max(data, d => d.pct)}%`);
-      svg.append("text").attr("x", legX+22).attr("y", 140)
-        .attr("font-size","11px").attr("fill","#333").text("0%");
-
-      svg.append("text").attr("x", legX).attr("y", 180)
-        .attr("class","legend-title").attr("font-weight","bold").text("Väestö");
-
-      const sizeLegData = [659000, 100000, 20000];
-      let legYOffset = 200;
-      sizeLegData.forEach(pop => {
-        const r = rScale(pop);
-        legYOffset += r;
-        svg.append("circle").attr("cx", legX+36).attr("cy", legYOffset).attr("r", r)
-          .attr("fill","none").attr("stroke","#999").attr("stroke-dasharray","3,2");
-        svg.append("text").attr("x", legX+36+r+6).attr("y", legYOffset+4)
-          .attr("font-size","11px").attr("fill","#555")
-          .text(pop >= 1000 ? `${Math.round(pop/1000)}k` : pop);
-        legYOffset += r + 8;
-      });
+      bubbles
+        .on("mouseover", (event, d) => {
+          tipText.text(d.pop.toLocaleString("fi-FI") + " asukasta");
+          const bb = tipText.node().getBBox();
+          const pad = 4;
+          tipRect
+            .attr("x", d.x - bb.width / 2 - pad)
+            .attr("y", d.y - d.r - bb.height - pad * 2 - 4)
+            .attr("width", bb.width + pad * 2)
+            .attr("height", bb.height + pad * 2);
+          tipText
+            .attr("x", d.x)
+            .attr("y", d.y - d.r - pad - 4);
+          tipG.style("display", null);
+        })
+        .on("mouseout", () => tipG.style("display", "none"));
 
       // --- Reveal / hide functions ---
-      function revealBubble(i) {
+      // step = scroll position (0 = first revealed), i = DOM/data index
+      function revealBubble(step) {
+        const i = revealSequence[step];
         const d = data[i];
-        d3.select(bubbles.nodes()[i])
-          .transition().duration(400)
-          .attr("r", d.r);
-        nameLabels.filter((_, j) => j === i)
+        d3.select(bubbles.nodes()[i]).transition().duration(400).attr("r", d.r);
+        nameLabels
+          .filter((_, j) => j === i)
           .attr("y", d.y + d.r + 13)
-          .transition().duration(300).delay(200)
+          .transition()
+          .duration(300)
+          .delay(200)
           .attr("opacity", 1);
-        pctLabels.filter((_, j) => j === i)
+        pctLabels
+          .filter((_, j) => j === i)
           .attr("y", d.y + d.r + 25)
-          .transition().duration(300).delay(280)
+          .transition()
+          .duration(300)
+          .delay(280)
           .attr("opacity", 1);
       }
 
-      function hideBubble(i) {
-        d3.select(bubbles.nodes()[i])
-          .transition().duration(300)
-          .attr("r", 0);
-        nameLabels.filter((_, j) => j === i)
-          .transition().duration(200)
+      function hideBubble(step) {
+        const i = revealSequence[step];
+        d3.select(bubbles.nodes()[i]).transition().duration(300).attr("r", 0);
+        nameLabels
+          .filter((_, j) => j === i)
+          .transition()
+          .duration(200)
           .attr("opacity", 0);
-        pctLabels.filter((_, j) => j === i)
-          .transition().duration(200)
+        pctLabels
+          .filter((_, j) => j === i)
+          .transition()
+          .duration(200)
           .attr("opacity", 0);
       }
 
@@ -259,11 +299,16 @@
       let currentIndex = -1; // tracks how many bubbles are currently visible
 
       window.addEventListener("scroll", () => {
-        const zoneTop = document.getElementById("scroll-zone").getBoundingClientRect().top;
+        const zoneTop = document
+          .getElementById("scrolly-1")
+          .getBoundingClientRect().top;
         const scrolled = Math.max(0, -zoneTop);
 
         // -1 when above the zone (nothing shown), 0..n-1 as we scroll down
-        const upTo = scrolled === 0 ? -1 : Math.min(data.length - 1, Math.floor(scrolled / STEP_PX));
+        const upTo =
+          scrolled === 0
+            ? -1
+            : Math.min(data.length - 1, Math.floor(scrolled / STEP_PX));
 
         if (upTo > currentIndex) {
           // scrolling down — reveal new bubbles
