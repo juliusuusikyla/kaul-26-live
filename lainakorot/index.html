@@ -4,46 +4,124 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
     <style>
       body {
         max-width: 960px;
         margin: 0 auto;
+        font-family: "Inter Tight", sans-serif;
       }
       .chart {
-        margin: 200px 0 !important;
+        margin: 24px;
+      }
+      p,
+      h1,
+      h2 {
+        max-width: 80%;
+        margin: 12px auto;
+      }
+      p {
+        font-size: 1.25em;
+      }
+      h1,
+      h2 {
+        padding: 12px 0;
+      }
+      h2 {
+        font-weight: 600;
+      }
+      img {
+        max-width: 100%;
+        margin-top: 50px;
+      }
+      .comment {
+        font-style: italic;
       }
     </style>
   </head>
   <body>
-    <h1>Heading</h1>
-    <p>Paragraph</p>
-    <div style="min-height: 463px" id="datawrapper-vis-nzjAh" class="chart">
-      <script
-        type="text/javascript"
-        defer
-        src="https://datawrapper.dwcdn.net/nzjAh/embed.js"
-        charset="utf-8"
-        data-target="#datawrapper-vis-nzjAh"
-      ></script>
-      <noscript
-        ><img
-          src="https://datawrapper.dwcdn.net/nzjAh/full.png"
-          alt="Korot nousussa – 12kk euribor kuitenkin viittaa tulevaan laskuun (Line chart)"
-      /></noscript>
+    <img src="asuntolainat-kuvitus.png" />
+    <h1>
+      Euriborien sahailu ennätysten tuntumassa jatkuu – Laskuri näyttää, kuinka
+      koron nousu vaikuttaisi asuntolainaasi
+    </h1>
+    <h2>
+      Euriborit reagoivat keskusteluun keskuspankkikorkojen tulevasta tasosta.
+    </h2>
+    <p>
+      Asuntolainojen viitekorkona yleisesti käytetty 12 kuukauden euribor nousi
+      tiistaina 4,208 prosenttiin maanantain 4,198 prosentista.
+    </p>
+    <p>
+      Euriborit nousivat vuonna 2022 erittäin nopeasti heijastellen muun muassa
+      Euroopan inflaatiokehitystä ja keskuspankeilta odotettuja ohjauskoron
+      nostoja.
+    </p>
+    <p>
+      Vuoden 2023 aikana sijoittajat ovat odottaneet ohjauskorkojen noston
+      taittumista ja vaihtelevat näkemykset ovat aiheuttaneet sahaamista. Eri
+      mittaisten euribor-korkojen tasojen läheneminen kertoo siitä, että
+      sijoittajat odottavat joko koronnostosyklin päättyneen tai olevan lähellä.
+    </p>
+    <p>Lyhyemmät korot käyttäytyivät tiistaina epäyhtenäisesti.</p>
+    <p>
+      Kuuden kuukauden euribor noteerattiin 4,128 prosentissa, kun edellispäivän
+      lukema oli 4,138 prosenttia. Kolmen kuukauden euribor nousi hiukan 3,964
+      prosenttiin edellispäivän 3,951 prosentista.
+    </p>
+    <p>
+      Euribor-korot lasketaan päivittäin kello 12 aikaan ja ne tulevat
+      julkisiksi vuorokauden viiveellä.
+    </p>
+
+    <h2>Inforgraafit: Datawrapper vs käsintehty ratkaisu</h2>
+
+    <p>
+      Nopeissa raktaisuissa datawrapperilla saadaan kätevästi kaikki luvut
+      näkyviin lukijalle
+    </p>
+    <div class="chart">
+      <div style="min-height: 463px" id="datawrapper-vis-nzjAh">
+        <script
+          type="text/javascript"
+          defer
+          src="https://datawrapper.dwcdn.net/nzjAh/embed.js"
+          charset="utf-8"
+          data-target="#datawrapper-vis-nzjAh"
+        ></script>
+        <noscript
+          ><img
+            src="https://datawrapper.dwcdn.net/nzjAh/full.png"
+            alt="Korot nousussa – 12kk euribor kuitenkin viittaa tulevaan laskuun (Line chart)"
+        /></noscript>
+      </div>
     </div>
-    <div style="min-height: 438px" id="datawrapper-vis-9tYJA" class="chart">
-      <script
-        type="text/javascript"
-        defer
-        src="https://datawrapper.dwcdn.net/9tYJA/embed.js"
-        charset="utf-8"
-        data-target="#datawrapper-vis-9tYJA"
-      ></script>
-      <noscript
-        ><img
-          src="https://datawrapper.dwcdn.net/9tYJA/full.png"
-          alt="Pitkät korot laskussa syyskuun huippulukemista (Line chart)"
-      /></noscript>
+    <p class="comment">
+      Alla versio - käsintehty infograafi. pohjat d3:lla --> illustratorilla
+      käsin "zoomaus"-ruutu. Tarkistaisin ajatuksen jutun toimittajan kanssa, ja
+      zoomaisin syys-marraskuun laskuun, jos jutun kärki voisi olla että 12kk
+      euriborin lasku enteilee alempaa korkotasoa.
+    </p>
+    <div class="chart">
+      <div style="min-height: 438px" id="datawrapper-vis-9tYJA" class="chart">
+        <script
+          type="text/javascript"
+          defer
+          src="https://datawrapper.dwcdn.net/9tYJA/embed.js"
+          charset="utf-8"
+          data-target="#datawrapper-vis-9tYJA"
+        ></script>
+        <noscript
+          ><img
+            src="https://datawrapper.dwcdn.net/9tYJA/full.png"
+            alt="Pitkät korot laskussa syyskuun huippulukemista (Line chart)"
+        /></noscript>
+      </div>
     </div>
   </body>
 </html>
