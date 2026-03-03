@@ -78,8 +78,8 @@
       }
       .sticky-chart {
         position: sticky;
-        top: 0;
-        height: 100vh;
+        top: 0; /* overridden by JS to header height */
+        height: 100vh; /* overridden by JS */
         display: flex;
         align-items: center;
         justify-content: center;
@@ -139,6 +139,15 @@
     </p>
 
     <script>
+      // Offset sticky-chart so it never slides under the sticky header
+      (function () {
+        const headerEl = document.querySelector("#scrolly-1 header");
+        const stickyEl = document.querySelector(".sticky-chart");
+        const hh = headerEl.offsetHeight;
+        stickyEl.style.top = hh + "px";
+        stickyEl.style.height = `calc(100vh - ${hh}px)`;
+      })();
+
       const data = [
         { name: "Inkoo", pct: 43, pop: 5600, lat: 60.05, lon: 24.0 },
         { name: "Kerava", pct: 41, pop: 37000, lat: 60.4, lon: 25.1 },
