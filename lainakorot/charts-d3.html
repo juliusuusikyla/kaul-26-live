@@ -415,8 +415,8 @@
       drawChart("chart2", DATA.filter(d => d.date >= peakDate), {
         title: "Pitkät korot laskussa syyskuun huippulukemista",
         subtitle: "3, 6 ja 12 kuukauden euribor, %",
-        xTickInterval: d3.timeWeek.every(2),
-        xTickFmt: d => `${d.getDate()}. ${FI_MONTHS[d.getMonth()]}`,
+        xTickInterval: d3.timeMonth.every(1),
+        xTickFmt: fiMonthFmt,
       });
     </script>
   </body>
