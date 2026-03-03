@@ -9,9 +9,13 @@
       .bar:hover {
         opacity: 0.8;
       }
+      p {
+        padding-bottom: 0;
+        margin-bottom: 0;
+      }
     </style>
   </head>
-  <body style="font-family: sans-serif;">
+  <body style="font-family: sans-serif">
     <h2>Pääkaupunkiseudun ulkopuolella kauppa käy</h2>
     <h3>Asuntokauppojen määrä 1–9/2025, %-muutos viime vuodesta</h3>
     <div id="chart"></div>
@@ -22,7 +26,7 @@
       // 1. Dimensions & margins
       const width = 820;
       const height = 510;
-      const margin = { top: 10, right: 210, bottom: 120, left: 110 };
+      const margin = { top: 10, right: 210, bottom: 20, left: 110 };
       const innerW = width - margin.left - margin.right;
       const innerH = height - margin.top - margin.bottom;
 
@@ -105,8 +109,8 @@
         g.append("g").attr("class", "axis").call(d3.axisLeft(y).tickSize(0));
 
         // 5b. Average line
-        const avg = d3.mean(data, (d) => d.value);
-        const avgLabel = `keskiarvo ${avg.toFixed(1).replace(".", ",")}%`;
+        const avg = 19.9; //d3.mean(data, (d) => d.value);
+        const avgLabel = `Koko Uudenmaan keskiarvo NN,N% (mainittu jutussa, tarkistaisin lähteestä)`;
 
         g.append("line")
           .attr("x1", x(avg))
@@ -157,21 +161,15 @@
           .attr("font-size", "12px")
           .attr("font-weight", "bold")
           .attr("fill", "#222")
+          .attr("opacity", 0)
           .text((d) => `+${d.value}%`);
 
         labels
           .transition()
           .duration(600)
           .delay((d, i) => i * 80)
-          .attr("x", (d) => x(d.value) + 6);
-
-        // 8. Average annotation — placed below the chart, pointing at x=20
-        const annoX = x(20);
-        const annoY = innerH + 50;
-        const annoLines = [
-          "Koko Uusimaan keskiarvo vajaa 20%",
-          "(tähän etsisin tarkan luvun)",
-        ];
+          .attr("x", (d) => x(d.value) + 6)
+          .attr("opacity", 1);
 
         const anno = g
           .append("text")
@@ -208,15 +206,21 @@
           { key: "pk-seutu", label: "Pääkaupunkiseutu" },
           { key: "uusimaa", label: "Muu Uusimaa" },
         ];
-        const legG = g.append("g").attr("transform", `translate(${legendX},${legendY})`);
+        const legG = g
+          .append("g")
+          .attr("transform", `translate(${legendX},${legendY})`);
         legendData.forEach((item, i) => {
-          const row = legG.append("g").attr("transform", `translate(0,${i * 20})`);
-          row.append("rect")
+          const row = legG
+            .append("g")
+            .attr("transform", `translate(0,${i * 20})`);
+          row
+            .append("rect")
             .attr("width", 12)
             .attr("height", 12)
             .attr("rx", 2)
             .attr("fill", color[item.key]);
-          row.append("text")
+          row
+            .append("text")
             .attr("x", 18)
             .attr("y", 10)
             .attr("font-size", "11px")
