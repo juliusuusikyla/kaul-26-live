@@ -107,10 +107,6 @@
     </style>
   </head>
   <body>
-    <div class="story-text">
-      <p><!-- intro text before chart --></p>
-    </div>
-
     <div id="scrolly-1" class="scrolly-zone">
       <header>
         <h2>Asuntojen myyntiluvuissa nousua – kuntien välillä eroja</h2>
@@ -128,10 +124,6 @@
           </div>
         </div>
       </div>
-    </div>
-
-    <div class="story-text">
-      <p><!-- analysis text after chart --></p>
     </div>
 
     <p class="footnote">
@@ -169,7 +161,7 @@
       ];
 
       // How many pixels of scrolling per bubble reveal
-      const STEP_PX = 200;
+      const STEP_PX = 150;
 
       // Make the scroll zone tall enough for all bubbles
       document.getElementById("scrolly-1").style.height =
@@ -207,12 +199,13 @@
         .clamp(true);
 
       const compress = 0.75;
-      const cx = margin.left + mapW / 2;
-      const cy = margin.top + mapH / 2;
+      const centerX = margin.left + mapW / 2;
+      const centerY = margin.top + mapH / 2;
+
       data.forEach((d) => {
         const [px, py] = projection([d.lon, d.lat]);
-        d.x = cx + (px - cx) * compress;
-        d.y = cy + (py - cy) * compress;
+        d.x = centerX + (px - centerX) * compress;
+        d.y = centerY + (py - centerY) * compress;
         d.r = rScale(d.pop);
       });
 
@@ -398,9 +391,10 @@
       function updateBarHighlight() {
         const allRevealed = revealedNames.size === data.length;
         d3.selectAll("#chart-pk .bar, #chart-uusimaa .bar")
-          .transition().duration(200)
+          .transition()
+          .duration(200)
           .attr("opacity", (d) =>
-            allRevealed ? 1 : revealedNames.has(d.name) ? 1 : 0.75
+            allRevealed ? 1 : revealedNames.has(d.name) ? 1 : 0.75,
           );
       }
 
