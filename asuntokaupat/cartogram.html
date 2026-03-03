@@ -14,6 +14,7 @@
         background: #f9f9f7;
         margin: 0;
         padding: 0;
+        max-width: 1000px;
       }
       header {
         position: sticky;
@@ -29,6 +30,9 @@
         margin-top: 0;
         font-weight: normal;
         color: #555;
+      }
+      p {
+        max-width: 800px;
       }
       .bubble {
         stroke: #fff;
@@ -88,6 +92,7 @@
         align-items: center;
         gap: 24px;
         max-width: 1200px;
+        margin-right: 50px;
       }
       .chart-row #chart {
         flex: 1;
@@ -103,6 +108,15 @@
         flex-direction: column;
         gap: 16px;
       }
+
+      @media (max-width: 700px) {
+        body {
+          margin: 0 12px;
+        }
+        .bars-panel {
+          display: none;
+        }
+      }
     </style>
   </head>
   <body>
@@ -110,12 +124,14 @@
       <header>
         <h2>Asuntojen myyntiluvuissa nousua – kuntien välillä eroja</h2>
         <h3>Asuntokauppojen määrä 1–9/2025, %-muutos viime vuodesta</h3>
-        <p style="font-size: 13px; color: #666; margin-top: 0">
+        <p style="font-size: 16px; color: #666; margin-top: 0">
           Vierittämällä alas näet kuinka paljon asuntojen myynti on noussut OP
           Uusimaan raportin mukaan.
         </p>
-        <p style="font-size: 13px; color: #666; margin-top: 0">
-          Ympyrän koko = väestö. Väri = myynnin kasvu (vaalea → tumma sininen).
+        <p style="font-size: 16px; color: #666; margin-top: 0">
+          Kartogrammi näyttää selvityksessä mainitut kunnat väkiluvun mukaan
+          (ympyrän koko), aseteltuna maantieteellistä sijaintia mukaillen Väri
+          näyttää myynnin kasvun (vaalea → tumma sininen).
         </p>
       </header>
       <div class="sticky-chart">
@@ -148,7 +164,14 @@
         { name: "Kerava", pct: 41, pop: 37000, lat: 60.4, lon: 25.1 },
         { name: "Mäntsälä", pct: 36, pop: 21000, lat: 60.63, lon: 25.32 },
         { name: "Kirkkonummi", pct: 31, pop: 39000, lat: 60.13, lon: 24.43 },
-        { name: "Järvenpää", pct: 23, pop: 43000, lat: 60.47, lon: 25.08, labelInside: true },
+        {
+          name: "Järvenpää",
+          pct: 23,
+          pop: 43000,
+          lat: 60.47,
+          lon: 25.08,
+          labelInside: true,
+        },
         { name: "Loviisa", pct: 23, pop: 15000, lat: 60.45, lon: 26.22 },
         { name: "Hyvinkää", pct: 22, pop: 46000, lat: 60.63, lon: 24.85 },
         { name: "Nurmijärvi", pct: 20, pop: 43000, lat: 60.47, lon: 24.8 },
@@ -346,7 +369,7 @@
           .attr("width", 0)
           .attr("fill", (d) => colorScale(d.pct))
           .attr("rx", 2)
-          .attr("opacity", 0.75)
+          .attr("opacity", 1)
           .transition()
           .duration(500)
           .attr("width", (d) => xScale(d.pct));
@@ -425,26 +448,11 @@
         })
         .on("mouseout", () => tipG.style("display", "none"));
 
-      // --- Bar highlight state ---
-      const revealedNames = new Set();
-
-      function updateBarHighlight() {
-        const allRevealed = revealedNames.size === data.length;
-        d3.selectAll("#chart-pk .bar, #chart-uusimaa .bar")
-          .transition()
-          .duration(200)
-          .attr("opacity", (d) =>
-            allRevealed ? 1 : revealedNames.has(d.name) ? 1 : 0.75,
-          );
-      }
-
       // --- Reveal / hide functions ---
       // step = scroll position (0 = first revealed), i = DOM/data index
       function revealBubble(step) {
         const i = revealSequence[step];
         const d = data[i];
-        revealedNames.add(d.name);
-        updateBarHighlight();
         d3.select(bubbles.nodes()[i]).transition().duration(400).attr("r", d.r);
         nameLabels
           .filter((_, j) => j === i)
@@ -466,8 +474,6 @@
 
       function hideBubble(step) {
         const i = revealSequence[step];
-        revealedNames.delete(data[i].name);
-        updateBarHighlight();
         d3.select(bubbles.nodes()[i]).transition().duration(300).attr("r", 0);
         nameLabels
           .filter((_, j) => j === i)
