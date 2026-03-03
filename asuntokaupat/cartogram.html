@@ -33,7 +33,6 @@
       .bubble {
         stroke: #fff;
         stroke-width: 1.5;
-        opacity: 0.88;
         cursor: default;
       }
       .bubble:hover {
@@ -41,13 +40,13 @@
         stroke-width: 2.5;
       }
       .label-name {
-        font-size: 11px;
+        font-size: 16px;
         fill: #222;
         font-weight: 600;
         pointer-events: none;
       }
       .label-pct {
-        font-size: 12px;
+        font-size: 16px;
         fill: #000;
         font-weight: 700;
         pointer-events: none;
@@ -112,6 +111,10 @@
         <h2>Asuntojen myyntiluvuissa nousua – kuntien välillä eroja</h2>
         <h3>Asuntokauppojen määrä 1–9/2025, %-muutos viime vuodesta</h3>
         <p style="font-size: 13px; color: #666; margin-top: 0">
+          Vierittämällä alas näet kuinka paljon asuntojen myynti on noussut OP
+          Uusimaan raportin mukaan.
+        </p>
+        <p style="font-size: 13px; color: #666; margin-top: 0">
           Ympyrän koko = väestö. Väri = myynnin kasvu (vaalea → tumma sininen).
         </p>
       </header>
@@ -145,7 +148,7 @@
         { name: "Kerava", pct: 41, pop: 37000, lat: 60.4, lon: 25.1 },
         { name: "Mäntsälä", pct: 36, pop: 21000, lat: 60.63, lon: 25.32 },
         { name: "Kirkkonummi", pct: 31, pop: 39000, lat: 60.13, lon: 24.43 },
-        { name: "Järvenpää", pct: 23, pop: 43000, lat: 60.47, lon: 25.08 },
+        { name: "Järvenpää", pct: 23, pop: 43000, lat: 60.47, lon: 25.08, labelInside: true },
         { name: "Loviisa", pct: 23, pop: 15000, lat: 60.45, lon: 26.22 },
         { name: "Hyvinkää", pct: 22, pop: 46000, lat: 60.63, lon: 24.85 },
         { name: "Nurmijärvi", pct: 20, pop: 43000, lat: 60.47, lon: 24.8 },
@@ -184,13 +187,13 @@
       const projection = d3
         .geoMercator()
         .center([25.1, 60.35])
-        .scale(22000)
+        .scale(28000)
         .translate([margin.left + mapW / 2, margin.top + mapH / 2]);
 
       const rScale = d3
         .scaleSqrt()
         .domain([0, d3.max(data, (d) => d.pop)])
-        .range([0, 72]);
+        .range([8, 90]);
 
       const colorScale = d3
         .scaleSequential()
@@ -214,6 +217,18 @@
 
       const g = svg.append("g");
 
+      // Base layer: grey ghost bubbles at full size, always visible
+      g.selectAll(".bubble-ghost")
+        .data(data)
+        .join("circle")
+        .attr("class", "bubble-ghost")
+        .attr("cx", (d) => d.x)
+        .attr("cy", (d) => d.y)
+        .attr("r", (d) => d.r)
+        .attr("fill", "#ccc")
+        .attr("stroke", "#fff")
+        .attr("stroke-width", 1.5);
+
       const bubbles = g
         .selectAll(".bubble")
         .data(data)
@@ -222,7 +237,8 @@
         .attr("cx", (d) => d.x)
         .attr("cy", (d) => d.y)
         .attr("r", 0)
-        .attr("fill", (d) => colorScale(d.pct));
+        .attr("fill", (d) => colorScale(d.pct))
+        .attr("opacity", 1);
 
       const nameLabels = g
         .selectAll(".label-name")
@@ -241,7 +257,7 @@
         .join("text")
         .attr("class", "label-pct")
         .attr("x", (d) => d.x)
-        .attr("y", (d) => d.y + d.r + 25)
+        .attr("y", (d) => d.y + d.r + 30)
         .attr("text-anchor", "middle")
         .attr("opacity", 0)
         .text((d) => `+${d.pct}%`);
@@ -290,7 +306,7 @@
           .append("text")
           .attr("x", mLeft)
           .attr("y", 16)
-          .attr("font-size", "11px")
+          .attr("font-size", "13px")
           .attr("font-weight", "600")
           .attr("fill", "#444")
           .text(title);
@@ -316,7 +332,7 @@
           .call((g) =>
             g
               .selectAll("text")
-              .attr("font-size", "10px")
+              .attr("font-size", "12px")
               .attr("fill", "#333")
               .attr("x", -4),
           );
@@ -342,7 +358,7 @@
           .attr("y", (d) => yScale(d.name) + yScale.bandwidth() / 2)
           .attr("dy", "0.35em")
           .attr("x", 2)
-          .attr("font-size", "10px")
+          .attr("font-size", "12px")
           .attr("font-weight", "700")
           .attr("fill", "#222")
           .text((d) => `+${d.pct}%`)
@@ -353,6 +369,30 @@
 
       drawBarChart("#chart-pk", dataPk, "Pääkaupunkiseutu");
       drawBarChart("#chart-uusimaa", dataUusimaa, "Muu Uusimaa");
+
+      // --- Scroll hint (top-left) ---
+      const hintG = svg
+        .append("g")
+        .attr("transform", "translate(20, 20)")
+        .style("pointer-events", "none");
+      hintG
+        .append("text")
+        .attr("x", 50)
+        .attr("y", 0)
+        .attr("font-size", "18px")
+        .attr("fill", "#888")
+        .attr("font-family", "sans-serif")
+        .attr("text-anchor", "middle")
+        .text("Vieritä");
+      hintG
+        .append("text")
+        .attr("x", 50)
+        .attr("y", 22)
+        .attr("font-size", "22px")
+        .attr("fill", "#aaa")
+        .attr("font-family", "sans-serif")
+        .attr("text-anchor", "middle")
+        .text("↓");
 
       // --- SVG tooltip (positioned at data point, centered above bubble) ---
       const tipG = svg
@@ -367,7 +407,7 @@
       const tipText = tipG
         .append("text")
         .attr("text-anchor", "middle")
-        .attr("font-size", "11px")
+        .attr("font-size", "13px")
         .attr("fill", "#333");
 
       bubbles
@@ -408,14 +448,16 @@
         d3.select(bubbles.nodes()[i]).transition().duration(400).attr("r", d.r);
         nameLabels
           .filter((_, j) => j === i)
-          .attr("y", d.y + d.r + 13)
+          .attr("y", d.labelInside ? d.y - 8 : d.y + d.r + 18)
+          .attr("fill", d.labelInside ? "#fff" : "#222")
           .transition()
           .duration(300)
           .delay(200)
           .attr("opacity", 1);
         pctLabels
           .filter((_, j) => j === i)
-          .attr("y", d.y + d.r + 25)
+          .attr("y", d.labelInside ? d.y + 12 : d.y + d.r + 36)
+          .attr("fill", d.labelInside ? "#fff" : "#000")
           .transition()
           .duration(300)
           .delay(280)
